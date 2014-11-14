@@ -5,26 +5,39 @@ import os
 import sys
 import time
 import fcntl
+import signal
+import configparser
 
 
-PID_FILE = '/var/run/judged.pid'
-LOG_FILE = '/var/log/judged.log'
+JudgeConfig = None
 
 
 def start_daemon():
+    pid_file_path = os.path.join(os.getcwd(), JudgeConfig['run']['pid_file'])
+    # LOG_FILE = os.path.join(os.getcwd(), LOG_FILE)
+
     pid = os.fork()
     if pid > 0:
         sys.exit(0)
 
-    os.chdir("/")
-    os.setsid()
+    os.chdir('/')
+    os.setsid(os.getpid())
     os.umask(0)
 
     pid = os.fork()
     if pid > 0:
         sys.exit(0)
 
-    print("Daemon on %d start successfully." % os.getpid())
+    pid_file = open(pid_file_path, mode='w')
+    fcntl.fcntl(pid_file, fcntl.F_GETLK)
+    try:
+        fcntl.flock(pid_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        print('Daemon on %d start successfully.' % os.getpid())
+    except IOError:
+        print('Judged process has running')
+        exit(0)
+    pid_file.write('%d' % os.getpid())
+
     sys.stdout.flush()
     sys.stderr.flush()
     si = open(os.devnull, 'r')
@@ -34,7 +47,7 @@ def start_daemon():
     os.dup2(so.fileno(), sys.stdout.fileno())
     # os.dup2(se.fileno(), sys.stderr.fileno())
 
-    log_file = open(LOG_FILE, 'w+')
+    # log_file = open(LOG_FILE, 'w+')
     while True:
         time.sleep(10)
         f = open('/Users/never/test.txt', 'a')
@@ -43,9 +56,13 @@ def start_daemon():
 
 
 def print_help():
-    print("usage: judged start|status|stop")
+    print('usage: judged start|status|stop')
 
 if __name__ == '__main__':
+
+    JudgeConfig = configparser.ConfigParser()
+    JudgeConfig.read('conf/judged.conf')
+
     if len(sys.argv) < 2:
         print_help()
         exit(0)
@@ -54,8 +71,9 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'status':
         pass
     elif sys.argv[1] == 'stop':
-        pid = open('judged.pid', 'r')
-        os.kill(int(pid.read()))
+        pid = int(open(JudgeConfig['run']['pid_file'], 'r').read())
+        print(pid)
+        os.kill(pid, signal.SIGKILL)
     else:
         print_help()
     exit(0)

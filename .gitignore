@@ -1,5 +1,8 @@
 test/
+log/
+run/
 .idea/
+test.py
 *.py[cod]
 
 # C extensions
@@ -36,3 +39,4 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
