@@ -1,3 +1,5 @@
+test/
+.idea/
 *.py[cod]
 
 # C extensions
