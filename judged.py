@@ -12,8 +12,8 @@ import configparser
 JudgeConfig = None
 
 
-def start_daemon():
-    pid_file_path = os.path.join(os.getcwd(), JudgeConfig['run']['pid_file'])
+def start_daemon(pid_file_path):
+    # pid_file_path = os.path.join(os.getcwd(), JudgeConfig['run']['pid_file'])
     # LOG_FILE = os.path.join(os.getcwd(), LOG_FILE)
 
     pid = os.fork()
@@ -21,7 +21,7 @@ def start_daemon():
         sys.exit(0)
 
     os.chdir('/')
-    os.setsid(os.getpid())
+    os.setsid()
     os.umask(0)
 
     pid = os.fork()
@@ -31,7 +31,7 @@ def start_daemon():
     pid_file = open(pid_file_path, mode='w')
     fcntl.fcntl(pid_file, fcntl.F_GETLK)
     try:
-        fcntl.flock(pid_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(pid_file, fcntl.LOCK_EX)
         print('Daemon on %d start successfully.' % os.getpid())
     except IOError:
         print('Judged process has running')
@@ -63,15 +63,17 @@ if __name__ == '__main__':
     JudgeConfig = configparser.ConfigParser()
     JudgeConfig.read('conf/judged.conf')
 
+    pid_file_path = os.path.join(os.getcwd(), JudgeConfig['run']['pid_file'])
+
     if len(sys.argv) < 2:
         print_help()
         exit(0)
     elif sys.argv[1] == 'start':
-        start_daemon()
+        start_daemon(pid_file_path)
     elif sys.argv[1] == 'status':
         pass
     elif sys.argv[1] == 'stop':
-        pid = int(open(JudgeConfig['run']['pid_file'], 'r').read())
+        pid = int(open(pid_file_path, 'r').read())
         print(pid)
         os.kill(pid, signal.SIGKILL)
     else:
