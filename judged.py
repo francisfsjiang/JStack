@@ -25,8 +25,11 @@ def start_daemon(pid_file_path):
         sys.exit(0)
 
     try:
-        pid_file = open(pid_file_path, mode='w')
-        print('Daemon on %d start successfully.' % os.getpid())
+        (_path, _) = os.path.split(pid_file_path)
+        if not os.path.exists(_path):
+            os.mkdir(_path)
+        pid_file = open(pid_file_path, mode='w+')
+        print('Judge daemon(pid=%d) start successfully.' % os.getpid())
         pid_file.write('%d' % os.getpid())
         pid_file.close()
     except FileExistsError:
@@ -46,7 +49,6 @@ def start_daemon(pid_file_path):
     while True:
         time.sleep(10)
         f = open('/Users/never/test.txt', 'a')
-        #f.wirte(str(os.getpid()))
         f.write('hello\n' + str(os.getpid()) + '\n')
 
 
@@ -72,7 +74,9 @@ if __name__ == '__main__':
             pid_file = open(pid_file_path, 'r')
             pid = int(pid_file.read())
             os.kill(pid, signal.SIGKILL)
-            print('Judge process(pid=%d) has bing killed' % pid)
+            print('Judge daemon(pid=%d) has bing killed' % pid)
+            pid_file.close()
+            os.remove(pid_file_path)
         except FileNotFoundError as e:
             print('Process is not running')
     else:
