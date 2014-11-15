@@ -4,7 +4,6 @@
 import os
 import sys
 import time
-import fcntl
 import signal
 import configparser
 
@@ -13,9 +12,6 @@ JudgeConfig = None
 
 
 def start_daemon(pid_file_path):
-    # pid_file_path = os.path.join(os.getcwd(), JudgeConfig['run']['pid_file'])
-    # LOG_FILE = os.path.join(os.getcwd(), LOG_FILE)
-
     pid = os.fork()
     if pid > 0:
         sys.exit(0)
@@ -28,31 +24,30 @@ def start_daemon(pid_file_path):
     if pid > 0:
         sys.exit(0)
 
-    pid_file = open(pid_file_path, mode='w')
-    fcntl.fcntl(pid_file, fcntl.F_GETLK)
     try:
-        fcntl.flock(pid_file, fcntl.LOCK_EX)
+        pid_file = open(pid_file_path, mode='w')
         print('Daemon on %d start successfully.' % os.getpid())
-    except IOError:
+        pid_file.write('%d' % os.getpid())
+        pid_file.close()
+    except FileExistsError:
         print('Judged process has running')
         exit(0)
-    pid_file.write('%d' % os.getpid())
 
     sys.stdout.flush()
     sys.stderr.flush()
     si = open(os.devnull, 'r')
     so = open(os.devnull, 'a+')
-    # se = open(os.devnull, 'a+')
+    se = open(os.devnull, 'a+')
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
-    # os.dup2(se.fileno(), sys.stderr.fileno())
+    os.dup2(se.fileno(), sys.stderr.fileno())
 
     # log_file = open(LOG_FILE, 'w+')
     while True:
         time.sleep(10)
         f = open('/Users/never/test.txt', 'a')
         #f.wirte(str(os.getpid()))
-        f.write('hello\n' + str(os.getpid()))
+        f.write('hello\n' + str(os.getpid()) + '\n')
 
 
 def print_help():
@@ -73,9 +68,13 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'status':
         pass
     elif sys.argv[1] == 'stop':
-        pid = int(open(pid_file_path, 'r').read())
-        print(pid)
-        os.kill(pid, signal.SIGKILL)
+        try:
+            pid_file = open(pid_file_path, 'r')
+            pid = int(pid_file.read())
+            os.kill(pid, signal.SIGKILL)
+            print('Judge process(pid=%d) has bing killed' % pid)
+        except FileNotFoundError as e:
+            print('Process is not running')
     else:
         print_help()
     exit(0)
