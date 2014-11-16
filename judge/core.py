@@ -92,4 +92,5 @@ def main_loop(logger: logging.Logger):
     """
     while True:
         time.sleep(3)
+
         logger.debug('Judge daemon runs for 3s.')
