@@ -17,4 +17,4 @@ class JudgeDBCoon:
         )
 
     def has_new_run(self):
-        self.coon
+        print(self.db_adapter.has_new_run())

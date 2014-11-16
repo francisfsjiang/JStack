@@ -6,7 +6,9 @@ import os
 import sys
 import time
 
-import pymongo
+# import pymongo
+
+from judge.db import JudgeDBCoon
 
 
 def init_logger(judge_config):
@@ -79,17 +81,18 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
     # os.dup2(so.fileno(), sys.stdout.fileno())
     # os.dup2(se.fileno(), sys.stderr.fileno())
 
-    main_loop(judge_logger)
+    main_loop(judge_config, judge_logger)
 
     exit(0)
 
 
-def main_loop(logger: logging.Logger):
+def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Logger):
     """
     A loop to check if there is
     :param logger:
     :return:
     """
+    db_coon = JudgeDBCoon(judge_config=JudgeDBCoon)
     while True:
         time.sleep(3)
 
