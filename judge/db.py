@@ -2,7 +2,7 @@
 
 from configparser import ConfigParser
 
-import pymongo
+from judge.db_adapter.mongo_adapter import MongoAdapter
 
 
 class JudgeDBCoon:
@@ -10,11 +10,11 @@ class JudgeDBCoon:
     :param
     """
     def __init__(self, judge_config: ConfigParser):
-        self.coon = pymongo.MongoClient(
-            judge_config['db']['host'],
-            int(judge_config['db']['port'])
+        self.db_adapter = MongoAdapter(
+            host=judge_config['db']['host'],
+            port=judge_config['db']['port'],
+            db=judge_config['db']['db_name']
         )
-        self.db = self.coon.run_queue
 
     def has_new_run(self):
         self.coon
