@@ -2,15 +2,15 @@
 
 from configparser import ConfigParser
 
-from judge.db_adapter.mongo_adapter import MongoAdapter
+from judge.db_adapter.mongo_adapter import MongodbAdapter
 
 
-class JudgeDBCoon:
+class JudgeDBConnection:
     """
     :param
     """
     def __init__(self, judge_config: ConfigParser):
-        self.db_adapter = MongoAdapter(
+        self.db_adapter = MongodbAdapter(
             host=judge_config['db']['host'],
             port=int(judge_config['db']['port']),
             db=judge_config['db']['db_name']

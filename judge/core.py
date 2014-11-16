@@ -8,7 +8,7 @@ import time
 
 # import pymongo
 
-from judge.db import JudgeDBCoon
+from judge.db import JudgeDBConnection
 
 
 def init_logger(judge_config):
@@ -83,6 +83,7 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
 
     main_loop(judge_config, judge_logger)
 
+    os.remove(pid_file_path)
     exit(0)
 
 
@@ -92,8 +93,12 @@ def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Log
     :param logger:
     :return:
     """
-    db_coon = JudgeDBCoon(judge_config)
-    while True:
-        time.sleep(3)
-        db_coon.has_new_run()
-        judge_logger.debug('Judge daemon runs for 3s.')
+    try:
+        db_coon = JudgeDBConnection(judge_config)
+        while True:
+            time.sleep(3)
+            db_coon.has_new_run()
+            judge_logger.debug('Judge daemon runs for 3s.')
+    except Exception as e:
+        judge_logger.error('%s' % e)
+        return
