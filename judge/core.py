@@ -55,8 +55,8 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
         sys.exit(0)
 
     if os.path.exists(pid_file_path):
-        print('Judged daemon is running.')
-        judge_logger.error('Judged daemon is running.')
+        print('Judged daemon has being running.')
+        judge_logger.error('Judged daemon has being running.')
         exit(0)
 
     try:
@@ -92,8 +92,8 @@ def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Log
     :param logger:
     :return:
     """
-    db_coon = JudgeDBCoon(judge_config=JudgeDBCoon)
+    db_coon = JudgeDBCoon(judge_config)
     while True:
         time.sleep(3)
-
-        logger.debug('Judge daemon runs for 3s.')
+        db_coon.has_new_run()
+        judge_logger.debug('Judge daemon runs for 3s.')
