@@ -83,7 +83,10 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
 
     main_loop(judge_config, judge_logger)
 
-    os.remove(pid_file_path)
+    try:
+        os.remove(pid_file_path)
+    except Exception as e:
+        judge_logger.error(e)
     exit(0)
 
 
@@ -100,5 +103,5 @@ def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Log
             db_coon.has_new_run()
             judge_logger.debug('Judge daemon runs for 3s.')
     except Exception as e:
-        judge_logger.error('%s' % e)
+        judge_logger.error(e)
         return

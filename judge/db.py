@@ -13,7 +13,7 @@ class JudgeDBConnection:
         self.db_adapter = MongodbAdapter(
             host=judge_config['db']['host'],
             port=int(judge_config['db']['port']),
-            db=judge_config['db']['db_name']
+            database=judge_config['db']['db_name']
         )
 
     def has_new_run(self):
