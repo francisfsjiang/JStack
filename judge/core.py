@@ -3,6 +3,7 @@
 import configparser
 import logging
 import os
+import signal
 import sys
 import time
 
@@ -42,17 +43,17 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
     """
 
     pid_file_path = os.path.join(os.getcwd(), judge_config['run']['pid_file'])
-    pid = os.fork()
-    if pid > 0:
-        sys.exit(0)
-
-    os.chdir('/')
-    os.setsid()
-    os.umask(0)
-
-    pid = os.fork()
-    if pid > 0:
-        sys.exit(0)
+    # pid = os.fork()
+    # if pid > 0:
+    #     sys.exit(0)
+    #
+    # os.chdir('/')
+    # os.setsid()
+    # os.umask(0)
+    #
+    # pid = os.fork()
+    # if pid > 0:
+    #     sys.exit(0)
 
     if os.path.exists(pid_file_path):
         print('Judged daemon has being running.')
@@ -80,6 +81,8 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
     os.dup2(si.fileno(), sys.stdin.fileno())
     # os.dup2(so.fileno(), sys.stdout.fileno())
     # os.dup2(se.fileno(), sys.stderr.fileno())
+
+    # signal.signal(signal.SIGKILL, exit_clean)
 
     main_loop(judge_config, judge_logger)
 

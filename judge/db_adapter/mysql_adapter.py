@@ -12,7 +12,7 @@ class MysqlAdapter(Adapter):
     # """
     # Mysql database adapter
     # """
-    # def __init__(self, host: str, port: int, database: str, user: str, password: str):
+    # def __init__(self, host='', port='', database='', user='', password=''):
     #     super().__init__()
     #     try:
     #         self.conn = mysql.connector.connect(

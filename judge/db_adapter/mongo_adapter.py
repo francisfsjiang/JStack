@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import pymongo
+import pymongo.errors
 import json
 
 import judge.errors as errors
@@ -18,8 +19,8 @@ class MongodbAdapter(Adapter):
                 host,
                 port
             )
-        except Exception as e:
-            print(e)
+        except pymongo.errors.ConnectionFailure:
+            raise errors.JSDBConnectionFailed('Connection failed')
         self.db = self.conn[database]
 
     def has_new_run(self):
