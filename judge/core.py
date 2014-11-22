@@ -101,7 +101,6 @@ def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Log
     """
     try:
         db_coon = JudgeDBConnection(judge_config)
-
         while True:
             time.sleep(3)
             db_coon.has_new_run()
