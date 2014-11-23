@@ -7,5 +7,5 @@ class DockerClient(requests.Session):
     """
 
     """
-    def __init__(self, url='unix::/'):
+    def __init__(self, url='unix:///var/run/docker.sock'):
         super().__init__()
