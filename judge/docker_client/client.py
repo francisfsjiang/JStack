@@ -78,6 +78,26 @@ class DockerNode(requests.Session):
         # return self.post(url, container_config, headers={'Content-Type: application/json'})
         return self.post(url, json=container_config)
 
-    def stop_container(self):
-        url = self.url + '/containers/%s/stop?t=1' % 'eb7b8b2cfd2b'
+    def stop_container(self, id):
+        url = self.url + '/containers/%s/stop?t=1' % id
         return self.post(url)
+
+    def start_container(self, id):
+        url = self.url + '/containers/%s/start' % id
+        start_config = {
+            "Binds": ["/tmp:/tmp"],
+            "Links": ["redis3:redis"],
+            "LxcConf": {"lxc.utsname":"docker"},
+            "PortBindings": {"22/tcp": [{"HostPort": "11022"}]},
+            "PublishAllPorts": False,
+            "Privileged": False,
+            "Dns": ["8.8.8.8"],
+            "DnsSearch": [""],
+            "VolumesFrom": ["parent", "other:ro"],
+            "CapAdd": [],
+            "CapDrop": ["MKNOD"],
+            "RestartPolicy": {"Name": "", "MaximumRetryCount": 0},
+            "NetworkMode": "bridge",
+            "Devices": []
+        }
+        return self.post(url, json=start_config)
