@@ -39,9 +39,9 @@ class DockerNode(requests.Session):
             "MemorySwap": -1,  #memory+swap
             "CpuShares": 0,
             "Cpuset": "",
-            "AttachStdin": False,
-            "AttachStdout": False,
-            "AttachStderr": False,
+            "AttachStdin": True,
+            "AttachStdout": True,
+            "AttachStderr": True,
             "Tty": False,
             "OpenStdin": False,
             "StdinOnce": False,
