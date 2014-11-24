@@ -4,4 +4,4 @@
 An Open Source Online Judgement System
 
 ##Base Architecture
-Docker container
+judge by docker container
