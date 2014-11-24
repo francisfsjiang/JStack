@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-import configparser
 import logging
 import os
 import signal
@@ -10,23 +9,23 @@ import time
 # import pymongo
 
 from judge.db import JudgeDBConnection
+from conf import judge_config
 
 
-def init_logger(judge_config):
+def init_logger():
     """
     Init and return the logger
-    :param judge_config:
     :return: judge_logger
     """
     judged_logger = logging.getLogger('Judged')
-    log_file_path = os.path.join(os.getcwd(), judge_config['log']['log_file'])
+    log_file_path = os.path.join(os.getcwd(), judge_config.LOG['log_file'])
     #check dir
     (_path, _) = os.path.split(log_file_path)
     if not os.path.exists(_path):
         os.mkdir(_path)
 
     log_handler = logging.FileHandler(log_file_path, delay=True)
-    log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_format = logging.Formatter(judge_config.LOG['format'])
     log_handler.setFormatter(log_format)
     log_handler.setLevel(level=logging.DEBUG)
     judged_logger.setLevel(level=logging.DEBUG)
@@ -34,7 +33,7 @@ def init_logger(judge_config):
     return judged_logger
 
 
-def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.Logger):
+def start_daemon(judge_logger: logging.Logger):
     """
     Start a daemon process which is running the .
     :param judge_config:
@@ -42,7 +41,7 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
     :return: None
     """
 
-    pid_file_path = os.path.join(os.getcwd(), judge_config['run']['pid_file'])
+    pid_file_path = os.path.join(os.getcwd(), judge_config.RUN['pid_file'])
     # pid = os.fork()
     # if pid > 0:
     #     sys.exit(0)
@@ -84,7 +83,7 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
 
     # signal.signal(signal.SIGKILL, exit_clean)
 
-    main_loop(judge_config, judge_logger)
+    main_loop(judge_logger)
 
     try:
         os.remove(pid_file_path)
@@ -93,7 +92,7 @@ def start_daemon(judge_config: configparser.ConfigParser, judge_logger: logging.
     exit(0)
 
 
-def main_loop(judge_config: configparser.ConfigParser, judge_logger: logging.Logger):
+def main_loop(judge_logger: logging.Logger):
     """
     A loop to check if there is
     :param logger:
