@@ -9,7 +9,7 @@ import time
 # import pymongo
 
 from judge.db import JudgeDBConnection
-import conf.judge_conf as judge_conf
+from conf import judge_config
 
 
 def init_logger():
@@ -83,9 +83,7 @@ def start_daemon(judge_logger: logging.Logger):
 
     # signal.signal(signal.SIGKILL, exit_clean)
 
-    print(type(judge_config))
-
-    main_loop(judge_config, judge_logger)
+    main_loop(judge_logger)
 
     try:
         os.remove(pid_file_path)

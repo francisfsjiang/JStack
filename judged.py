@@ -7,11 +7,7 @@ import sys
 
 import judge.core
 
-try:
-    from conf.judge_conf import judge_conf
-except ImportError as e:
-    print("config file not found")
-    exit(0)
+from conf import judge_config
 
 
 def print_help():
@@ -20,13 +16,13 @@ def print_help():
 if __name__ == '__main__':
 
     pid_file_path = os.path.join(os.getcwd(), judge_config.RUN['pid_file'])
-    judge_logger = judge.core.init_logger(judge_config)
+    judge_logger = judge.core.init_logger()
 
     if len(sys.argv) < 2:
         print_help()
         exit(0)
     elif sys.argv[1] == 'start':
-        judge.core.start_daemon(judge_config, judge_logger)
+        judge.core.start_daemon(judge_logger)
     elif sys.argv[1] == 'status':
         pass
     elif sys.argv[1] == 'stop':
