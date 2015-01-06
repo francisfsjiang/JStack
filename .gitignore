@@ -5,7 +5,10 @@ run/
 test.py
 
 judged/judged.xcodeproj/
-
+CMakeCache.txt
+Makefile
+CMakeFiles/
+cmake_install.cmake
 *.py[cod]
 
 # C extensions
