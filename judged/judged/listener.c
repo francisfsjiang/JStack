@@ -1,3 +1,4 @@
+#include <errno.h>
 #include "listener.h"
 
 char buffer[MAX_BUFFER_SIZE];
@@ -58,7 +59,7 @@ void prepare_listen()
     
     ret = bind(socket_fd, &sock_addr, sizeof(LISTEN_ADDR));
     if (ret < 0) {
-        syslog(LOG_ERR, "socket bind failed.");
+        syslog(LOG_ERR, "socket bind failed. %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
     

@@ -2,6 +2,9 @@
 #define __judged__judger__
 
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
 
 typedef struct
 {

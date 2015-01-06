@@ -17,7 +17,6 @@
 #define MAX_BUFFER_SIZE 0x10000C //1MB + 12B
 
 
-
 void prepare_listen();
 
 #endif /* defined(__judged__listener__) */
