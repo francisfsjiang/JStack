@@ -1,5 +1,6 @@
 #include <errno.h>
 #include "listener.h"
+#include "judger.h"
 
 char buffer[MAX_BUFFER_SIZE];
 
@@ -11,7 +12,7 @@ int parse_run_info(char * recv_buffer, ssize_t recv_size, run_info * run_info)
     run_info->problem_id = (uint)recv_buffer[0];
     run_info->time_limit = (uint)recv_buffer[4];
     run_info->mem_limit = (uint)recv_buffer[8];
-    run_info->code_len = (uint)(recv_size - 12);
+    run_info->code_len = (uint)(recv_size - 12)
     run_info->code = &buffer[12];
     return 0;
 }
@@ -38,8 +39,13 @@ void main_loop(int socket_fd)
             syslog(LOG_ERR, "reply failed. %s", strerror(errno));
             continue;
         }
-        parse_run_info(buffer, recv_size, &run);
-        
+        ret = parse_run_info(buffer, recv_size, &run);
+        if (ret < 0){
+            syslog(LOG_ERR, "recv data size error.");
+            continue;
+        }
+        syslog(LOG_INFO, "run id:%d tl:%d ml:%d cl:%d.",run.problem_id, run.time_limit, run.mem_limit, run.code_len);
+        syslog(LOG_DEBUG, "code : %s",run.code);
     }
 }
 
