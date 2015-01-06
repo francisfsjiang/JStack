@@ -1,11 +1,3 @@
-//
-//  listener.c
-//  judged
-//
-//  Created by Neveralso on 15/1/6.
-//  Copyright (c) 2015年 neveralso. All rights reserved.
-//
-
 #include "listener.h"
 
 char buffer[MAX_BUFFER_SIZE];

@@ -1,11 +1,3 @@
-//
-//  listener.h
-//  judged
-//
-//  Created by Neveralso on 15/1/6.
-//  Copyright (c) 2015年 neveralso. All rights reserved.
-//
-
 #ifndef __judged__listener__
 #define __judged__listener__
 

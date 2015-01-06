@@ -1,11 +1,3 @@
-//
-//  main.c
-//  judged
-//
-//  Created by Neveralso on 15/1/6.
-//  Copyright (c) 2015年 neveralso. All rights reserved.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,8 +6,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/syslog.h>
-#include <sys/file.h>
-#include <sys/lockf.h>
 
 #include "listener.h"
 
