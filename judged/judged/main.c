@@ -81,7 +81,7 @@ void start_daemon()
 void open_log()
 {
     //open_log("judged", LOG_PID, LOG_DAEMON);
-    //setlogmask(LOG_UPTO(LOG_DEBUG));
+    setlogmask(LOG_UPTO(LOG_DEBUG));
     openlog ("judged", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
     syslog(LOG_ALERT, "log started.");
 }
