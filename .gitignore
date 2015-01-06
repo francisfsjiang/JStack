@@ -3,6 +3,9 @@ log/
 run/
 .idea/
 test.py
+
+judged/judged.xcodeproj/
+
 *.py[cod]
 
 # C extensions
