@@ -12,13 +12,12 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#define IO_DIR "/tmp/data/"
-
-char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
+#define INPUT_DIR "/tmp/data"
 
 typedef struct
 {
     uint problem_id;
+    uint lang;
     uint time_limit;
     uint mem_limit;
     uint code_len;
@@ -26,7 +25,7 @@ typedef struct
 }run_param;
 
 enum status_code{
-    AC, //Accepted
+    AC=0, //Accepted
     WA, //Wrong Answer
     PE, //Presentation Error
     CE, //Compile Error
@@ -34,6 +33,27 @@ enum status_code{
     TLE, //Time Limit Exceeded
     MLE, //Memory Limit Exceeded
     OLE, //Output Limit Exceeded
+};
+
+enum lang{
+    C=0,
+    CXX,
+    JAVA,
+    CS,
+    PY,
+    RB,
+    
+};
+
+char *code_file_name[]={
+    "code.c",
+    "code.cpp",
+    "code.java",
+};
+
+char *compile_cmd[]={
+    "gcc code.c -o code",
+    "g++ code.cpp -o cpp"
 };
 
 typedef struct

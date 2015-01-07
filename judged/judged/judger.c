@@ -1,22 +1,28 @@
 #include "judger.h"
 
-int get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name)
+char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
+
+void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
 {
     char file_name[30];
     unsigned long len;
     strcpy(file_name, file_path);
     len = strlen(file_name);
-    sprintf(file_name+len, "%d/", probelm_id);
+    sprintf(file_name+len, "/%d/", probelm_id);
     len = strlen(file_name);
     sprintf(file_name+len, "%s", target_name);
-    *fd = open(file_name, O_RDONLY);
-    if (*fd < 0) {
-        syslog(LOG_INFO, "open file %s failed. %s", file_name, strerror(errno));
-        return -1;
-    }
+    *fd = open(file_name, mode);
     syslog(LOG_INFO, "open file %s", file_name);
-    return 0;
 }
+
+void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_fd)
+{
+    get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
+    *output_fd = open("code.out", O_WRONLY|O_CREAT);
+    ftruncate(*output_fd, 0);
+    *code_fd = open(code_file_name[run->lang], O_WRONLY|O_CREAT);
+    ftruncate(*code_fd, 0);
+};
 
 int judge(run_param * run)
 {
@@ -26,7 +32,7 @@ int judge(run_param * run)
     int pid, null_dev;
     int ret;
     
-    int input_fd, output_fd;
+    int input_fd, output_fd, code_fd;
     syslog(LOG_DEBUG, "%s", TEMP_DIR_TEMPLATE);
     temp_dir = mkdtemp(TEMP_DIR_TEMPLATE);
     if (temp_dir == NULL) {
@@ -34,8 +40,16 @@ int judge(run_param * run)
         return -1;
     }
     
-    get_file_fd(run->problem_id, &input_fd, IO_DIR, "input.int");
-    output_fd =
+    chdir(temp_dir);
+    
+    prepare_files(run, &input_fd, &output_fd, &code_fd);
+    
+    write(code_fd, run->code, run->code_len);
+    close(code_fd);
+    
+    syslog(LOG_INFO, "exec %s", compile_cmd[run->lang]);
+    execl(compile_cmd[run->lang], NULL);
+    
     null_dev = open("/dev/null", O_RDWR);
     
     pid = fork();
@@ -49,7 +63,7 @@ int judge(run_param * run)
             syslog(LOG_ERR, "chroot failed. %s", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        chdir("/");
+        chdir("temp_dir");
         
         dup2(null_dev, STDERR_FILENO);
         

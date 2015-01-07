@@ -6,14 +6,15 @@ char buffer[MAX_BUFFER_SIZE];
 
 int parse_run_param(char * recv_buffer, ssize_t recv_size, run_param * param)
 {
-    if (recv_size <= 12) {
+    if (recv_size <= 16) {
         return -1;
     }
     param->problem_id = (uint)recv_buffer[0];
-    param->time_limit = (uint)recv_buffer[4];
-    param->mem_limit = (uint)recv_buffer[8];
-    param->code_len = (uint)(recv_size - 12);
-    param->code = &buffer[12];
+    param->lang = (uint)recv_buffer[4];
+    param->time_limit = (uint)recv_buffer[8];
+    param->mem_limit = (uint)recv_buffer[12];
+    param->code_len = (uint)(recv_size - 16);
+    param->code = &buffer[16];
     return 0;
 }
 
