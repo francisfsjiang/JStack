@@ -15,7 +15,7 @@
 
 #define TEMP_DIR_TEMPLATE "/tmp/judgetmp.XXXXXXXX"
 
-#define INPUT_DIR "/tmp/data/"
+#define IO_DIR "/tmp/data/"
 
 typedef struct
 {

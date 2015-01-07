@@ -12,7 +12,7 @@ int parse_run_param(char * recv_buffer, ssize_t recv_size, run_param * param)
     param->problem_id = (uint)recv_buffer[0];
     param->time_limit = (uint)recv_buffer[4];
     param->mem_limit = (uint)recv_buffer[8];
-    param->code_len = (uint)(recv_size - 12)
+    param->code_len = (uint)(recv_size - 12);
     param->code = &buffer[12];
     return 0;
 }
