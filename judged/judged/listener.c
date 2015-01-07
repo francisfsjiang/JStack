@@ -9,12 +9,7 @@ int parse_run_param(char * recv_buffer, ssize_t recv_size, run_param * param)
     if (recv_size <= 16) {
         return -1;
     }
-    param->problem_id = (uint)recv_buffer[0];
-    param->lang = (uint)recv_buffer[4];
-    param->time_limit = (uint)recv_buffer[8];
-    param->mem_limit = (uint)recv_buffer[12];
-    param->code_len = (uint)(recv_size - 16);
-    param->code = &buffer[16];
+    param = (run_param *)recv_buffer;
     return 0;
 }
 
@@ -45,7 +40,11 @@ void main_loop(int socket_fd)
             syslog(LOG_ERR, "recv data size error.");
             continue;
         }
-        syslog(LOG_INFO, "run id:%d tl:%d ml:%d cl:%d.",run.problem_id, run.time_limit, run.mem_limit, run.code_len);
+        syslog(LOG_INFO, "run id:%d lang:%d tl:%d ml:%d.",
+                run.problem_id,
+                run.lang,
+                run.time_limit,
+                run.mem_limit);
         syslog(LOG_DEBUG, "code : %s",run.code);
 
         judge(&run);

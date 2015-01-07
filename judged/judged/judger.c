@@ -2,6 +2,17 @@
 
 char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
 
+char *code_file_name[]={
+        "code.c",
+        "code.cpp",
+        "code.java",
+};
+
+char *compile_cmd[]={
+        "gcc code.c -o code",
+        "g++ code.cpp -o cpp"
+};
+
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
 {
     char file_name[30];
@@ -20,6 +31,8 @@ void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_f
     get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
     *output_fd = open("code.out", O_WRONLY|O_CREAT);
     ftruncate(*output_fd, 0);
+    syslog(LOG_DEBUG, "code num : %s.",code_file_name[run->lang]);
+    syslog(LOG_DEBUG, "code file : %s.",code_file_name[run->lang]);
     *code_fd = open(code_file_name[run->lang], O_WRONLY|O_CREAT);
     ftruncate(*code_fd, 0);
 };
@@ -33,18 +46,27 @@ int judge(run_param * run)
     int ret;
     
     int input_fd, output_fd, code_fd;
-    syslog(LOG_DEBUG, "%s", TEMP_DIR_TEMPLATE);
+
     temp_dir = mkdtemp(TEMP_DIR_TEMPLATE);
     if (temp_dir == NULL) {
         syslog(LOG_ERR, "err creating temp dir. %s", strerror(errno));
         return -1;
     }
+    syslog(LOG_DEBUG, "temp_dir made %s.", TEMP_DIR_TEMPLATE);
     
     chdir(temp_dir);
     
     prepare_files(run, &input_fd, &output_fd, &code_fd);
-    
-    write(code_fd, run->code, run->code_len);
+    if (input_fd <0 || output_fd<0 || code_fd<0)
+    {
+        syslog(LOG_ERR, "file prepare failed. %s", strerror(errno));
+    }
+
+    ret = (int)write(code_fd, run->code, strlen(run->code));
+    if (ret < 0) {
+        syslog(LOG_ERR, "code write err. %s", strerror(errno));
+        return -1;
+    }
     close(code_fd);
     
     syslog(LOG_INFO, "exec %s", compile_cmd[run->lang]);
