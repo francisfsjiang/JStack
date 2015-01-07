@@ -4,7 +4,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <pwd.h>
+#include <syslog.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
+
+
+#define TEMP_DIR_TEMPLATE "/tmp/judgetmp.XXXXXXXX"
+
 
 typedef struct
 {
@@ -32,6 +41,10 @@ typedef struct
     uint time_used;
     uint mem_used;
 }run_result;
-run_result judge(run_info * run);
+int judge(run_info * run);
+
+
+
+
 
 #endif /* defined(__judged__judger__) */
