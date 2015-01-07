@@ -27,7 +27,7 @@ int judge(run_param * run)
     int ret;
     
     int input_fd, output_fd;
-    
+    syslog(LOG_DEBUG, "%s", TEMP_DIR_TEMPLATE);
     temp_dir = mkdtemp(TEMP_DIR_TEMPLATE);
     if (temp_dir == NULL) {
         syslog(LOG_ERR, "err creating temp dir. %s", strerror(errno));

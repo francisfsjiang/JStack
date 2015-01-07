@@ -12,10 +12,9 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-
-#define TEMP_DIR_TEMPLATE "/tmp/judgetmp.XXXXXXXX"
-
 #define IO_DIR "/tmp/data/"
+
+char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
 
 typedef struct
 {

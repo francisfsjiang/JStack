@@ -46,6 +46,8 @@ void main_loop(int socket_fd)
         }
         syslog(LOG_INFO, "run id:%d tl:%d ml:%d cl:%d.",run.problem_id, run.time_limit, run.mem_limit, run.code_len);
         syslog(LOG_DEBUG, "code : %s",run.code);
+
+        judge(&run);
     }
 }
 
