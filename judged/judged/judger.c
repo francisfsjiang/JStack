@@ -31,7 +31,7 @@ void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_f
     get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
     *output_fd = open("code.out", O_WRONLY|O_CREAT);
     ftruncate(*output_fd, 0);
-    syslog(LOG_DEBUG, "code num : %s.",code_file_name[run->lang]);
+    syslog(LOG_DEBUG, "prob num : %s.",code_file_name[run->problem_id]);
     syslog(LOG_DEBUG, "code file : %s.",code_file_name[run->lang]);
     *code_fd = open(code_file_name[run->lang], O_WRONLY|O_CREAT);
     ftruncate(*code_fd, 0);
