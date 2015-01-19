@@ -10,7 +10,9 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include <sys/ptrace.h>
 #include <sys/types.h>
+#include <sys/resource.h>
 
 #define INPUT_DIR "/tmp/data"
 
