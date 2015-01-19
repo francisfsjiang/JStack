@@ -8,9 +8,9 @@ char *code_file_name[]={
         "code.java",
 };
 
-char *compile_cmd[]={
-        "gcc code.c -o code",
-        "g++ code.cpp -o cpp"
+char *compile_cmd[][10]={
+        {"gcc","code.c","-o","code", NULL},
+        {"g++","code.cpp","-o","code", NULL},
 };
 
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
@@ -29,7 +29,7 @@ void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char *
 void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_fd)
 {
     get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
-    *output_fd = open("code.out", O_WRONLY|O_CREAT);
+    *output_fd = open("out.out", O_WRONLY|O_CREAT);
     ftruncate(*output_fd, 0);
     syslog(LOG_DEBUG, "prob num : %s.",code_file_name[run->problem_id]);
     syslog(LOG_DEBUG, "code file : %s.",code_file_name[run->lang]);
@@ -69,9 +69,19 @@ int judge(run_param * run)
     }
     close(code_fd);
     
-    syslog(LOG_INFO, "exec %s", compile_cmd[run->lang]);
-    execl(compile_cmd[run->lang], NULL);
-    
+    //syslog(LOG_INFO, "exec %s.\n", compile_cmd[run->lang]);
+    //execvp(compile_cmd[run->lang], NULL);
+
+    //char buf[100];
+    //getcwd(buf, sizeof(buf));
+    //syslog(LOG_DEBUG, "cwd: %s.\n", buf);
+    //char *argv[] = {"gcc","code.c","-o","code",NULL};
+    ret = execvp(compile_cmd[run->lang][0],compile_cmd[run->lang]);
+    if (ret < 0){
+        syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
     null_dev = open("/dev/null", O_RDWR);
     
     pid = fork();
