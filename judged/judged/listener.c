@@ -48,7 +48,9 @@ void main_loop(int socket_fd)
         syslog(LOG_DEBUG, "code : %s",run.code);
 
         judge(&run);
+        break;
     }
+    close(in_socket_fd);
 }
 
 void prepare_listen()
@@ -79,6 +81,6 @@ void prepare_listen()
     }
     
     main_loop(socket_fd);
-    
+    close(socket_fd);
 }
 

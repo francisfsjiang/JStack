@@ -46,7 +46,11 @@ int main()
 	memcpy(buffer, &p, 16);
 	memcpy(buffer+18, &cbuf, strlen(cbuf));
 	printf("%s\n", buffer);
-	send(sock_fd, buffer, 16+strlen(cbuf), 0);
+	ret = send(sock_fd, buffer, 16+strlen(cbuf), 0);
+	if (ret < 0){
+		printf("send failed.\n");
+	}
+	printf("%d sended.\n",ret);
 
 	return 0;
 }
