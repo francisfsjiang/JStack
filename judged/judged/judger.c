@@ -9,8 +9,13 @@ char *code_file_name[]={
 };
 
 char *compile_cmd[][10]={
-        {"gcc","code.c","-o","code", NULL},
-        {"g++","code.cpp","-o","code", NULL},
+    {"gcc","code.c","-o","code", NULL},
+    {"g++","code.cpp","-o","code", NULL},
+};
+
+char *run_cmd[][10]={
+    {"code"},
+    {"code"},
 };
 
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
@@ -44,6 +49,10 @@ int judge(run_param * run)
     //struct passwd *nobody= getpwnam("nobody");
     int pid, null_dev;
     int ret;
+    
+    uid_t nobody_uid;
+    gid_t nobody_gid;
+    struct passwd *nobody;
     
     int input_fd, output_fd, code_fd;
 
@@ -84,24 +93,70 @@ int judge(run_param * run)
 
     null_dev = open("/dev/null", O_RDWR);
     
+    nobody = getpwnam("nobody");
+    if (nobody == NULL) {
+        syslog(LOG_ERR, "find user nobody failed.\n");
+    }
+    nobody_uid = nobody->pw_uid;
+    nobody_gid = nobody->pw_gid;
+    
     pid = fork();
     if (pid < 0) {
         syslog(LOG_ERR,"judge fork error");
         return -1;
     }
     if (pid == 0) {
+        //child
         ret = chroot(temp_dir);
         if (ret < 0) {
             syslog(LOG_ERR, "chroot failed. %s", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        chdir("temp_dir");
+        chdir("/");
         
         dup2(null_dev, STDERR_FILENO);
+        dup2(input_fd, STDIN_FILENO);
+        dup2(output_fd, STDOUT_FILENO);
         
+        setuid(nobody_uid);
+        setgid(nobody_gid);
         
+        ret = ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+        if (ret < 0){
+            syslog(LOG_ERR, "Error initiating ptrace");
+        }
+        
+        ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
     }
     else if (pid > 0){
+        //parent
+        
+        while(1) { //listening
+            wait3(&status, WUNTRACED, &usage);
+            //int st = parse_status(status);
+            //int time = tv2ms(usage.ru_utime) + tv2ms(usage.ru_stime);
+            //long memory_now = usage.ru_minflt * (getpagesize() >> 10);
+            //if (memory_now > memory_max)
+            //    memory_max = memory_now;
+            if ((time > timeLimit) || timeout_killed) {
+                printf("Time Limit Exceeded\n");
+                ptrace(PTRACE_KILL, child_pid, NULL, NULL);
+                return TLE;
+            }
+            if (memory_max > memoryLimit) {
+                printf("Memory Limit Exceeded\n");
+                ptrace(PTRACE_KILL, child_pid, NULL, NULL);
+                return MLE;
+            }
+            if (st >= 0) { //exited
+                printf("%d %dms %ldKiB\n", WEXITSTATUS(status), time, memory_max);
+                return st;
+            }
+            if (st == EX_YOYOCHECKNOW) { 
+                check_call(child_pid);
+            }
+            listen_again(child_pid);
+        }
         
     }
     

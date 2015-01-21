@@ -6,10 +6,13 @@
 //  Copyright (c) 2015年 neveralso. All rights reserved.
 //
 
-#ifndef __judged__syscall_checker__
-#define __judged__syscall_checker__
+#ifndef __judged__checker__
+#define __judged__checker__
 
 #include <stdio.h>
+#include <error.h>
+#include <sys/ptrace.h>
+
 
 
 

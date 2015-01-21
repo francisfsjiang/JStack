@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 neveralso. All rights reserved.
 //
 
-#include "syscall_checker.h"
+#include "checker.h"
 
 
 const int syscall_white[] = {
@@ -29,7 +29,9 @@ int _search(int syscall)
     return _bin_search(syscall, 0, sizeof(syscall_white)/4-1);
 }
 
-int syscall_checker(int syscall)
+int syscall_checker(pid_t pid)
 {
-    return _search(syscall);
+    int syscall = ptrace(PTRACE_PEEKUSER, pid, (void *)(8*ORIG_RAX), NULL);
+    int ret;
+    ret =  _search(syscall);
 }

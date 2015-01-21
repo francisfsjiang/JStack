@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 
+#include "checker.h"
+
 #define INPUT_DIR "/tmp/data"
 
 typedef struct
