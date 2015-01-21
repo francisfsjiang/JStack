@@ -13,6 +13,8 @@
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/resource.h>
+#include <sys/wait.h>
+#include <sys/user.h>
 
 #include "checker.h"
 
@@ -37,13 +39,14 @@ enum status_code{
     TLE, //Time Limit Exceeded
     MLE, //Memory Limit Exceeded
     OLE, //Output Limit Exceeded
+    FIN,
 };
 
 enum lang{
     C=0,
     CXX,
     JAVA,
-    CS,
+    CSH,
     PY,
     RB,
     

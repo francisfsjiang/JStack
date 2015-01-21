@@ -3,5 +3,7 @@ set(SOURCE_FILES
     listener.h
     listener.c
     judger.h
-    judger.c)
+    judger.c
+    checker.h
+    checker.c)
 add_executable(judged ${SOURCE_FILES})

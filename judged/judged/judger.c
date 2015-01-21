@@ -1,3 +1,4 @@
+
 #include "judger.h"
 
 char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
@@ -84,11 +85,24 @@ int judge(run_param * run)
     //char buf[100];
     //getcwd(buf, sizeof(buf));
     //syslog(LOG_DEBUG, "cwd: %s.\n", buf);
+    char *argv[] = {"ls","-a",NULL};
     //char *argv[] = {"gcc","code.c","-o","code",NULL};
-    ret = execvp(compile_cmd[run->lang][0],compile_cmd[run->lang]);
-    if (ret < 0){
-        syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
-        exit(EXIT_FAILURE);
+    //execv("/bin/ls", argv);
+    //execvp("ls", argv);
+    //ret = execl("/bin/ls", "ls", "-l", NULL);
+    //ret = execvp(argv[0], argv);
+    pid = fork();
+    if (pid < 0) {
+        syslog(LOG_ERR,"judge compile fork error");
+        return -1;
+    }
+    if (pid == 0) {
+        ret = execvp(compile_cmd[run->lang][0],compile_cmd[run->lang]);
+        if (ret < 0){
+            syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        syslog(LOG_DEBUG, "compile successfully.\n");
     }
 
     null_dev = open("/dev/null", O_RDWR);
@@ -96,6 +110,7 @@ int judge(run_param * run)
     nobody = getpwnam("nobody");
     if (nobody == NULL) {
         syslog(LOG_ERR, "find user nobody failed.\n");
+        exit(EXIT_FAILURE);
     }
     nobody_uid = nobody->pw_uid;
     nobody_gid = nobody->pw_gid;
@@ -107,21 +122,21 @@ int judge(run_param * run)
     }
     if (pid == 0) {
         //child
-        ret = chroot(temp_dir);
+        /*ret = chroot(temp_dir);
         if (ret < 0) {
             syslog(LOG_ERR, "chroot failed. %s", strerror(errno));
             exit(EXIT_FAILURE);
-        }
-        chdir("/");
+        }*/
+        //chdir("/");
         
-        dup2(null_dev, STDERR_FILENO);
-        dup2(input_fd, STDIN_FILENO);
-        dup2(output_fd, STDOUT_FILENO);
+        //dup2(null_dev, STDERR_FILENO);
+        //dup2(input_fd, STDIN_FILENO);
+        //dup2(output_fd, STDOUT_FILENO);
         
-        setuid(nobody_uid);
-        setgid(nobody_gid);
+        //setuid(nobody_uid);
+        //setgid(nobody_gid);
         
-        ret = ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+        ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
         }
@@ -130,15 +145,18 @@ int judge(run_param * run)
     }
     else if (pid > 0){
         //parent
+
+        int status;
+        struct rusage usage;
         
         while(1) { //listening
             wait3(&status, WUNTRACED, &usage);
-            //int st = parse_status(status);
+            int cs = check_status(status);
             //int time = tv2ms(usage.ru_utime) + tv2ms(usage.ru_stime);
             //long memory_now = usage.ru_minflt * (getpagesize() >> 10);
             //if (memory_now > memory_max)
             //    memory_max = memory_now;
-            if ((time > timeLimit) || timeout_killed) {
+            /*if ((time > timeLimit) || timeout_killed) {
                 printf("Time Limit Exceeded\n");
                 ptrace(PTRACE_KILL, child_pid, NULL, NULL);
                 return TLE;
@@ -147,15 +165,30 @@ int judge(run_param * run)
                 printf("Memory Limit Exceeded\n");
                 ptrace(PTRACE_KILL, child_pid, NULL, NULL);
                 return MLE;
+            }*/
+            if (cs == CS_ERROR) { //exited
+                //printf("%d %dms %ldKiB\n", WEXITSTATUS(status), time, memory_max);
+                syslog(LOG_DEBUG, "program exited.\n");
+                return FIN;
             }
-            if (st >= 0) { //exited
-                printf("%d %dms %ldKiB\n", WEXITSTATUS(status), time, memory_max);
-                return st;
+            if (cs == CS_SYSCALL) {
+                syslog(LOG_DEBUG, "get syscall.\n");
+                ret = syscall_checker(pid);
+                if (ret == CS_FORBIDDEN){
+                    ptrace(PTRACE_KILL, pid, NULL, NULL);
+                    return RE;
+                }
+
             }
-            if (st == EX_YOYOCHECKNOW) { 
-                check_call(child_pid);
+            if (cs == CS_SUCCESS) {
+                return FIN;
             }
-            listen_again(child_pid);
+
+            ret = (int) ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
+            if (ret < -1) {
+                syslog(LOG_ERR, "Trace again failed.\n");
+                exit(EXIT_FAILURE);
+            }
         }
         
     }
