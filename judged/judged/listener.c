@@ -52,7 +52,6 @@ void main_loop(int socket_fd)
         syslog(LOG_DEBUG, "code : %s",run.code);
 
         judge(&run);
-        break;
     }
     close(in_socket_fd);
 }

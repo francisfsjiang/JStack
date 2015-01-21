@@ -15,8 +15,8 @@ char *compile_cmd[][10]={
 };
 
 char *run_cmd[][10]={
-    {"code"},
-    {"code"},
+    {"./code", "./code", NULL},
+    {"./code", "./code", NULL},
 };
 
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
@@ -37,7 +37,7 @@ void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_f
     get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
     *output_fd = open("out.out", O_WRONLY|O_CREAT);
     ftruncate(*output_fd, 0);
-    syslog(LOG_DEBUG, "prob num : %s.",code_file_name[run->problem_id]);
+    syslog(LOG_DEBUG, "prob num : %d.",run->problem_id);
     syslog(LOG_DEBUG, "code file : %s.",code_file_name[run->lang]);
     *code_fd = open(code_file_name[run->lang], O_WRONLY|O_CREAT);
     ftruncate(*code_fd, 0);
@@ -85,7 +85,7 @@ int judge(run_param * run)
     //char buf[100];
     //getcwd(buf, sizeof(buf));
     //syslog(LOG_DEBUG, "cwd: %s.\n", buf);
-    char *argv[] = {"ls","-a",NULL};
+    //char *argv[] = {"ls","-a",NULL};
     //char *argv[] = {"gcc","code.c","-o","code",NULL};
     //execv("/bin/ls", argv);
     //execvp("ls", argv);
@@ -129,19 +129,21 @@ int judge(run_param * run)
         }*/
         //chdir("/");
         
-        //dup2(null_dev, STDERR_FILENO);
-        //dup2(input_fd, STDIN_FILENO);
-        //dup2(output_fd, STDOUT_FILENO);
+        dup2(null_dev, STDERR_FILENO);
+        dup2(input_fd, STDIN_FILENO);
+        dup2(output_fd, STDOUT_FILENO);
         
         //setuid(nobody_uid);
         //setgid(nobody_gid);
-        
+
         ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
         }
-        
-        ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
+        //char *argv[] = {NULL};
+        ret = execv("./code", NULL);
+        syslog(LOG_ERR, "run code error.\n");
+        //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
     }
     else if (pid > 0){
         //parent
@@ -190,7 +192,7 @@ int judge(run_param * run)
                 exit(EXIT_FAILURE);
             }
         }
-        
+        sleep(5);
     }
     
     return 0;
