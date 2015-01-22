@@ -35,7 +35,7 @@ void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char *
 void prepare_files(run_param* run, int * input_fd, int * output_fd, int * code_fd)
 {
     get_file_fd(run->problem_id, input_fd, INPUT_DIR, "test.in", O_RDONLY);
-    *output_fd = open("out.out", O_WRONLY|O_CREAT);
+    *output_fd = open("out.out", O_WRONLY|O_CREAT, S_IRWXU| S_IRWXG| S_IRWXO);
     ftruncate(*output_fd, 0);
     syslog(LOG_DEBUG, "prob num : %d.",run->problem_id);
     syslog(LOG_DEBUG, "code file : %s.",code_file_name[run->lang]);
@@ -50,6 +50,7 @@ int judge(run_param * run)
     //struct passwd *nobody= getpwnam("nobody");
     int pid, null_dev;
     int ret;
+    int status;
     
     uid_t nobody_uid;
     gid_t nobody_gid;
@@ -102,7 +103,18 @@ int judge(run_param * run)
             syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        syslog(LOG_DEBUG, "compile successfully.\n");
+    }
+    else {
+        waitpid(pid, &status, WUNTRACED | WCONTINUED);
+        if (WIFEXITED(status)) {
+            printf("exited, status=%d\n", WEXITSTATUS(status));
+        } else if (WIFSIGNALED(status)) {
+            printf("killed by signal %d\n", WTERMSIG(status));
+        } else if (WIFSTOPPED(status)) {
+            printf("stopped by signal %d\n", WSTOPSIG(status));
+        } else if (WIFCONTINUED(status)) {
+            printf("continued\n");
+        }
     }
 
     null_dev = open("/dev/null", O_RDWR);
@@ -114,6 +126,15 @@ int judge(run_param * run)
     }
     nobody_uid = nobody->pw_uid;
     nobody_gid = nobody->pw_gid;
+
+    //char *argv[] = {NULL};
+    //ret = execv("code", argv);
+    //syslog(LOG_ERR, "run code error.\n");
+
+
+
+
+
     
     pid = fork();
     if (pid < 0) {
@@ -132,27 +153,29 @@ int judge(run_param * run)
         dup2(null_dev, STDERR_FILENO);
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
+
+        /*int a,b;
+        scanf("%d %d",&a,&b);
+        printf("%d\n",a+b);*/
         
         //setuid(nobody_uid);
         //setgid(nobody_gid);
 
-        ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+        /*ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
-        }
-        //char *argv[] = {NULL};
-        ret = execv("./code", NULL);
+        }*/
+        char *argv[] = {NULL};
+        ret = execv("code", argv);
         syslog(LOG_ERR, "run code error.\n");
         //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
     }
     else if (pid > 0){
         //parent
-
-        int status;
         struct rusage usage;
         
         while(1) { //listening
-            wait3(&status, WUNTRACED, &usage);
+            wait4(pid, &status, WUNTRACED| WCONTINUED, &usage);
             int cs = check_status(status);
             //int time = tv2ms(usage.ru_utime) + tv2ms(usage.ru_stime);
             //long memory_now = usage.ru_minflt * (getpagesize() >> 10);
