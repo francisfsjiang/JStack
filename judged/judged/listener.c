@@ -4,7 +4,7 @@
 
 char buffer[MAX_BUFFER_SIZE];
 
-int parse_run_param(char * recv_buffer, ssize_t recv_size, run_param * param)
+int parse_run_param(run_param * param, char * recv_buffer, ssize_t recv_size)
 {
     if (recv_size <= 20) {
         return -1;
@@ -22,7 +22,7 @@ void main_loop(int socket_fd)
     socklen_t in_addr_len;
     int in_socket_fd;
     ssize_t recv_size;
-    run_param run;
+    run_param *run;
     int ret;
     while (1) {
         in_socket_fd = accept(socket_fd, (struct sockaddr *)&in_addr, &in_addr_len);
@@ -38,20 +38,24 @@ void main_loop(int socket_fd)
             syslog(LOG_ERR, "reply failed. %s", strerror(errno));
             continue;
         }
-        ret = parse_run_param(buffer, recv_size, &run);
+
+        run = malloc(sizeof(run_param));
+        ret = parse_run_param(run, buffer, recv_size);
         if (ret < 0){
             syslog(LOG_ERR, "recv data size error.");
             continue;
         }
         syslog(LOG_INFO, "run id:%d lang:%d tl:%d ml:%d cl:%d.",
-                run.problem_id,
-                run.lang,
-                run.time_limit,
-                run.mem_limit,
-                run.code_len);
-        syslog(LOG_DEBUG, "code : %s",run.code);
+                run->problem_id,
+                run->lang,
+                run->time_limit,
+                run->mem_limit,
+                run->code_len);
+        syslog(LOG_DEBUG, "code : %s",run->code);
 
-        judge(&run);
+        judge(run);
+        free(run->code);
+        free(run);
     }
     close(in_socket_fd);
 }

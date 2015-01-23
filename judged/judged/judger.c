@@ -106,15 +106,8 @@ int judge(run_param * run)
     }
     else {
         waitpid(pid, &status, WUNTRACED | WCONTINUED);
-        if (WIFEXITED(status)) {
-            printf("exited, status=%d\n", WEXITSTATUS(status));
-        } else if (WIFSIGNALED(status)) {
-            printf("killed by signal %d\n", WTERMSIG(status));
-        } else if (WIFSTOPPED(status)) {
-            printf("stopped by signal %d\n", WSTOPSIG(status));
-        } else if (WIFCONTINUED(status)) {
-            printf("continued\n");
-        }
+        int cs = check_status(status);
+        syslog(LOG_DEBUG, "code compile status code:%d\n",cs);
     }
 
     null_dev = open("/dev/null", O_RDWR);
@@ -153,18 +146,14 @@ int judge(run_param * run)
         dup2(null_dev, STDERR_FILENO);
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
-
-        /*int a,b;
-        scanf("%d %d",&a,&b);
-        printf("%d\n",a+b);*/
         
         //setuid(nobody_uid);
         //setgid(nobody_gid);
 
-        /*ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+        ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
-        }*/
+        }
         char *argv[] = {NULL};
         ret = execv("code", argv);
         syslog(LOG_ERR, "run code error.\n");

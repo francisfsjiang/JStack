@@ -14,12 +14,14 @@
 #include <termios.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/ptrace.h>
 #include <sys/reg.h>
+#include <sys/syscall.h>
 
 enum check_status_code{
     CS_SUCCESS = 0,

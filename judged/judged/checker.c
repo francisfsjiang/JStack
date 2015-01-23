@@ -5,12 +5,12 @@
 //  Created by Neveralso on 15/1/7.
 //  Copyright (c) 2015年 neveralso. All rights reserved.
 //
-#include <unistd.h>
+
 #include "checker.h"
 
 
 const long syscall_white[] = {
-    0
+        59,         //execv
 };
 
 int _bin_search(long syscall, int start, int end)
@@ -31,9 +31,9 @@ int _search(long syscall)
 
 int syscall_checker(pid_t pid)
 {
+    int ret;
     long syscall = ptrace(PTRACE_PEEKUSER, pid, (void *)(8*ORIG_RAX), NULL);
     syslog(LOG_DEBUG, "find syscall id : %ld.\n", syscall);
-    int ret;
     ret =  _search(syscall);
     if (ret){
         return CS_ALLOW;
