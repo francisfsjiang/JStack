@@ -164,7 +164,7 @@ int judge(run_param * run)
         struct rusage usage;
         
         while(1) { //listening
-            wait4(pid, &status, WUNTRACED| WCONTINUED, &usage);
+            wait4(pid, &status, WUNTRACED | WCONTINUED, &usage);
             int cs = check_status(status);
             //int time = tv2ms(usage.ru_utime) + tv2ms(usage.ru_stime);
             //long memory_now = usage.ru_minflt * (getpagesize() >> 10);
@@ -188,7 +188,7 @@ int judge(run_param * run)
             if (cs == CS_SYSCALL) {
                 syslog(LOG_DEBUG, "get syscall.\n");
                 ret = syscall_checker(pid);
-                if (ret == CS_FORBIDDEN){
+                if (ret == CS_FORBIDDEN) {
                     ptrace(PTRACE_KILL, pid, NULL, NULL);
                     return RE;
                 }
@@ -204,7 +204,6 @@ int judge(run_param * run)
                 exit(EXIT_FAILURE);
             }
         }
-        sleep(5);
     }
     
     return 0;

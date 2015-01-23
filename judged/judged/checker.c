@@ -8,7 +8,7 @@
 
 #include "checker.h"
 
-
+//find from bits/syscall.h unistd_64.h
 const long syscall_white[] = {
         59,         //execv
 };
