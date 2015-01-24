@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <sys/syslog.h>
 
-#include "listener.h"
+#include "listener.hpp"
 
 #define LOCK_FILE "/var/run/judged.pid"
 #define LOCK_MODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)

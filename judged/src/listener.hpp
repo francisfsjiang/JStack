@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "judger.h"
+#include "judger.hpp"
 
 #define LISTEN_PORT 23333
 #define LISTEN_ADDR "0.0.0.0" 

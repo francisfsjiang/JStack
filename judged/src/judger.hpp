@@ -16,7 +16,7 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 
-#include "checker.h"
+#include "checker.hpp"
 
 #define INPUT_DIR "/tmp/data"
 

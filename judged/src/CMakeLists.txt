@@ -1,9 +1,9 @@
 set(SOURCE_FILES
-    main.c
-    listener.h
-    listener.c
-    judger.h
-    judger.c
-    checker.h
-    checker.c)
+    main.cpp
+    listener.hpp
+    listener.cpp
+    judger.hpp
+    judger.cpp
+    checker.hpp
+    checker.cpp)
 add_executable(judged ${SOURCE_FILES})
