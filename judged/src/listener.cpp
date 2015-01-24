@@ -10,7 +10,7 @@ int parse_run_param(run_param * param, char * recv_buffer, ssize_t recv_size)
         return -1;
     }
     memcpy(param, recv_buffer, 20);
-    param->code = malloc(sizeof(char)*param->code_len);
+    param->code = (char*)malloc(sizeof(char)*param->code_len);
     memcpy(param->code, recv_buffer+20, param->code_len);
     //param = (run_param *)recv_buffer;
     return 0;
@@ -39,7 +39,7 @@ void main_loop(int socket_fd)
             continue;
         }
 
-        run = malloc(sizeof(run_param));
+        run = (run_param*)malloc(sizeof(run_param));
         ret = parse_run_param(run, buffer, recv_size);
         if (ret < 0){
             syslog(LOG_ERR, "recv data size error.");

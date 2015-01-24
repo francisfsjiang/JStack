@@ -1,5 +1,5 @@
 
-#include "judger.h"
+#include "judger.hpp"
 
 char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
 
