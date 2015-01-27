@@ -3,7 +3,7 @@
 
 char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
 
-char *code_file_name[]={
+const char *code_file_name[]={
         "code.c",
         "code.cpp",
         "code.java",

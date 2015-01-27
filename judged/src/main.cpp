@@ -96,7 +96,6 @@ int main(int argc, const char * argv[]) {
         syslog(LOG_ERR, "daemon already running");
         exit(EXIT_FAILURE);
     }*/
-    
     prepare_listen();
     
     return 0;
