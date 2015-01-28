@@ -3,5 +3,5 @@
 
 void log(LogLevel level, const char* format, ...)
 {
-    
+
 }
