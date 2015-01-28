@@ -45,14 +45,13 @@ int syscall_checker(pid_t pid)
 
 int check_status(int status){
     syslog(LOG_DEBUG, "get status code :%d", status);
-    if (WIFEXITED(status)) //call ing exit(3) or _exit(2), or by returning from main().
+    if (WIFEXITED(status))  //call ing exit(3) or _exit(2), or by returning from main().
     {
         if (WEXITSTATUS(status) == 0)
             return CS_SUCCESS;
         else
             return CS_ERROR;
     }
-
     if (WIFSIGNALED(status))
         return CS_ERROR;
 
