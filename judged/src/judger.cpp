@@ -9,12 +9,14 @@ const char *code_file_name[]={
         "code.java",
 };
 
-char *compile_cmd[][10]={
+
+char * const compile_cmd[][10]={
     {"gcc","code.c","-o","code", NULL},
     {"g++","code.cpp","-o","code", NULL},
 };
 
-char *run_cmd[][10]={
+
+char * const run_cmd[][10]={
     {"./code", "./code", NULL},
     {"./code", "./code", NULL},
 };

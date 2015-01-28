@@ -1,8 +1,11 @@
 #ifndef __judged__judger__
 #define __judged__judger__
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <pwd.h>
@@ -17,6 +20,8 @@
 #include <sys/user.h>
 
 #include "checker.hpp"
+
+using namespace std;
 
 #define INPUT_DIR "/tmp/data"
 
