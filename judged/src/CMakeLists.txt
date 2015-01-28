@@ -5,5 +5,7 @@ set(SOURCE_FILES
     judger.hpp
     judger.cpp
     checker.hpp
-    checker.cpp)
+    checker.cpp
+    util.hpp
+    util.cpp)
 add_executable(judged ${SOURCE_FILES})
