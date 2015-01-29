@@ -1,11 +1,3 @@
-//
-//  syscall_checker.h
-//  judged
-//
-//  Created by Neveralso on 15/1/7.
-//  Copyright (c) 2015年 neveralso. All rights reserved.
-//
-
 #ifndef __judged__checker__
 #define __judged__checker__
 
@@ -23,16 +15,22 @@
 #include <sys/reg.h>
 #include <sys/syscall.h>
 
-enum check_status_code{
-    CS_SUCCESS = 0,
-    CS_ERROR,
-    CS_SYSCALL,
-    CS_ALLOW,
-    CS_FORBIDDEN,
+enum SYSCALL_STATUS{
+    SS_ALLOW,
+    SS_FORBIDDEN,
 };
 
+enum PROCESS_STATUS{
+    PS_EXIT_SUCCESS = 0,
+    PS_EXIT_ERROR,
+    PS_SYSCALL,
+    PS_TERM_BY_SIGNAL,
+};
+
+
+
 int syscall_checker(pid_t pid);
-int check_status(int status);
+int parse_status(int status);
 
 
 #endif /* defined(__judged__syscall_checker__) */

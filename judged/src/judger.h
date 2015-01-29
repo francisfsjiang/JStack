@@ -16,9 +16,7 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 
-#include "checker.h"
-
-#define INPUT_DIR "/tmp/data"
+#define INPUT_DIR "/home/data"
 
 typedef struct
 {
@@ -46,10 +44,11 @@ enum lang{
     C=0,
     CXX,
     JAVA,
-    CSH,
-    PY,
-    RB,
-    
+    CSHARP,
+    OBJC,
+    PYTHON,
+    RUBY,
+    OCTAVE,
 };
 
 
@@ -61,9 +60,6 @@ typedef struct
     uint mem_used;
 }run_result;
 int judge(run_param * run);
-
-
-
 
 
 #endif /* defined(__judged__judger__) */

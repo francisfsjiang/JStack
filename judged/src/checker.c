@@ -1,32 +1,12 @@
-//
-//  syscall_checker.c
-//  judged
-//
-//  Created by Neveralso on 15/1/7.
-//  Copyright (c) 2015年 neveralso. All rights reserved.
-//
-
+#include <string.h>
 #include "checker.h"
+#include "syscall_table.h"
 
-//find from bits/syscall.h unistd_64.h
-const long syscall_white[] = {
-        59,         //execv
-};
+int syscall_counter[sizeof(syscall_table)];
 
-int _bin_search(long syscall, int start, int end)
+void syscall_checker_init()
 {
-    int mid = (start + end) >>1;
-    if (start > end) {
-        return 0;
-    }
-    if (syscall_white[mid] == syscall) return 1;
-    else if (syscall_white[mid] > syscall) return _bin_search(syscall, start, mid-1);
-    else return _bin_search(syscall, mid+1, end);
-}
-
-int _search(long syscall)
-{
-    return _bin_search(syscall, 0, sizeof(syscall_white)/4-1);
+    memset(syscall_counter, 0, sizeof(syscall_counter));
 }
 
 int syscall_checker(pid_t pid)
@@ -34,36 +14,41 @@ int syscall_checker(pid_t pid)
     int ret;
     long syscall = ptrace(PTRACE_PEEKUSER, pid, (void *)(8*ORIG_RAX), NULL);
     syslog(LOG_DEBUG, "find syscall id : %ld.\n", syscall);
-    ret =  _search(syscall);
-    if (ret){
-        return CS_ALLOW;
+    return SS_ALLOW;
+    if (syscall_table[syscall] == 1){
+        return SS_ALLOW;
+    }
+    else if (syscall_table[syscall] == 2
+            && syscall_counter[syscall] < syscall_limit[syscall]){
+        syscall_counter[syscall]++;
+        return SS_ALLOW;
     }
     else {
-        return CS_FORBIDDEN;
+        return SS_FORBIDDEN;
     }
 }
 
-int check_status(int status){
-    syslog(LOG_DEBUG, "get status code :%d", status);
+int parse_status(int status){
+    //syslog(LOG_DEBUG, "get status code :%d", status);
     if (WIFEXITED(status)) //call ing exit(3) or _exit(2), or by returning from main().
     {
         if (WEXITSTATUS(status) == 0)
-            return CS_SUCCESS;
+            return PS_EXIT_SUCCESS;
         else
-            return CS_ERROR;
+            return PS_EXIT_ERROR;
     }
 
     if (WIFSIGNALED(status))
-        return CS_ERROR;
+        return PS_TERM_BY_SIGNAL;
 
     if (WIFSTOPPED(status))
     {
         int sig = WSTOPSIG(status);
-        syslog(LOG_DEBUG, "get stopped sig : %d", sig);
+        //syslog(LOG_DEBUG, "get stopped sig : %d", sig);
         if (sig == SIGTRAP)
         {
-            return CS_SYSCALL;
+            return PS_SYSCALL;
         }
     }
-    return CS_SUCCESS;
+    return PS_EXIT_ERROR;
 }

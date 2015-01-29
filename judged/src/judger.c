@@ -1,7 +1,8 @@
-
 #include "judger.h"
+#include "checker.h"
 
-char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
+char * const TEMP_DIR_TEMPLATE = "/tmp/judgetmp.XXXXXX";
+char TEMP_DIR[] = "/tmp/judgetmp.XXXXXX";
 
 char *code_file_name[]={
         "code.c",
@@ -58,12 +59,13 @@ int judge(run_param * run)
     
     int input_fd, output_fd, code_fd;
 
-    temp_dir = mkdtemp(TEMP_DIR_TEMPLATE);
+    strcpy(TEMP_DIR, TEMP_DIR_TEMPLATE);
+    temp_dir = mkdtemp(TEMP_DIR);
     if (temp_dir == NULL) {
         syslog(LOG_ERR, "err creating temp dir. %s", strerror(errno));
         return -1;
     }
-    syslog(LOG_DEBUG, "temp_dir made %s.", TEMP_DIR_TEMPLATE);
+    syslog(LOG_DEBUG, "temp_dir made %s.", TEMP_DIR);
     
     chdir(temp_dir);
     
@@ -79,19 +81,8 @@ int judge(run_param * run)
         return -1;
     }
     close(code_fd);
-    
-    //syslog(LOG_INFO, "exec %s.\n", compile_cmd[run->lang]);
-    //execvp(compile_cmd[run->lang], NULL);
 
-    //char buf[100];
-    //getcwd(buf, sizeof(buf));
-    //syslog(LOG_DEBUG, "cwd: %s.\n", buf);
-    //char *argv[] = {"ls","-a",NULL};
-    //char *argv[] = {"gcc","code.c","-o","code",NULL};
-    //execv("/bin/ls", argv);
-    //execvp("ls", argv);
-    //ret = execl("/bin/ls", "ls", "-l", NULL);
-    //ret = execvp(argv[0], argv);
+    //compile code
     pid = fork();
     if (pid < 0) {
         syslog(LOG_ERR,"judge compile fork error");
@@ -106,7 +97,7 @@ int judge(run_param * run)
     }
     else {
         waitpid(pid, &status, WUNTRACED | WCONTINUED);
-        int cs = check_status(status);
+        int cs = parse_status(status);
         syslog(LOG_DEBUG, "code compile status code:%d\n",cs);
     }
 
@@ -124,11 +115,6 @@ int judge(run_param * run)
     //ret = execv("code", argv);
     //syslog(LOG_ERR, "run code error.\n");
 
-
-
-
-
-    
     pid = fork();
     if (pid < 0) {
         syslog(LOG_ERR,"judge fork error");
@@ -165,7 +151,7 @@ int judge(run_param * run)
         
         while(1) { //listening
             wait4(pid, &status, WUNTRACED | WCONTINUED, &usage);
-            int cs = check_status(status);
+            int cs = parse_status(status);
             //int time = tv2ms(usage.ru_utime) + tv2ms(usage.ru_stime);
             //long memory_now = usage.ru_minflt * (getpagesize() >> 10);
             //if (memory_now > memory_max)
@@ -180,28 +166,28 @@ int judge(run_param * run)
                 ptrace(PTRACE_KILL, child_pid, NULL, NULL);
                 return MLE;
             }*/
-            if (cs == CS_ERROR) { //exited
+            if (cs == PS_EXIT_ERROR) { //exited
                 //printf("%d %dms %ldKiB\n", WEXITSTATUS(status), time, memory_max);
-                syslog(LOG_DEBUG, "program exited.\n");
+                syslog(LOG_DEBUG, "program exited error.\n");
                 return FIN;
             }
-            if (cs == CS_SYSCALL) {
-                syslog(LOG_DEBUG, "get syscall.\n");
+            if (cs == PS_SYSCALL) {
                 ret = syscall_checker(pid);
-                if (ret == CS_FORBIDDEN) {
+                if (ret == SS_FORBIDDEN) {
+                    syslog(LOG_INFO, "forbid syscall");
                     ptrace(PTRACE_KILL, pid, NULL, NULL);
                     return RE;
                 }
-
             }
-            if (cs == CS_SUCCESS) {
+            if (cs == PS_EXIT_SUCCESS) {
+                syslog(LOG_DEBUG, "program exited successfully.\n");
                 return FIN;
             }
 
             ret = (int) ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
             if (ret < -1) {
                 syslog(LOG_ERR, "Trace again failed.\n");
-                exit(EXIT_FAILURE);
+                return RE;
             }
         }
     }
