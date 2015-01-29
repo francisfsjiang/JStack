@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -8,7 +7,7 @@
 #include <sys/stat.h>
 #include <sys/syslog.h>
 
-#include "listener.hpp"
+#include "listener.h"
 
 #define LOCK_FILE "/var/run/judged.pid"
 #define LOCK_MODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
@@ -96,6 +95,7 @@ int main(int argc, const char * argv[]) {
         syslog(LOG_ERR, "daemon already running");
         exit(EXIT_FAILURE);
     }*/
+    
     prepare_listen();
     
     return 0;

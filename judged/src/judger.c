@@ -1,22 +1,20 @@
 
-#include "judger.hpp"
+#include "judger.h"
 
 char TEMP_DIR_TEMPLATE[] = "/tmp/judgetmp.XXXXXX";
 
-const char *code_file_name[]={
+char *code_file_name[]={
         "code.c",
         "code.cpp",
         "code.java",
 };
 
-
-char * const compile_cmd[][10]={
+char *compile_cmd[][10]={
     {"gcc","code.c","-o","code", NULL},
     {"g++","code.cpp","-o","code", NULL},
 };
 
-
-char * const run_cmd[][10]={
+char *run_cmd[][10]={
     {"./code", "./code", NULL},
     {"./code", "./code", NULL},
 };
