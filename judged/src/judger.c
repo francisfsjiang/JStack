@@ -1,5 +1,5 @@
 #include "judger.h"
-#include "checker.h"
+
 
 char * const TEMP_DIR_TEMPLATE = "/tmp/judgetmp.XXXXXX";
 char TEMP_DIR[] = "/tmp/judgetmp.XXXXXX";
@@ -49,7 +49,7 @@ int judge(run_param * run)
     //run_result result;
     char * temp_dir;
     //struct passwd *nobody= getpwnam("nobody");
-    int pid, null_dev;
+    int pid, null_fd;
     int ret;
     int status;
     
@@ -74,6 +74,8 @@ int judge(run_param * run)
     {
         syslog(LOG_ERR, "file prepare failed. %s", strerror(errno));
     }
+    syslog(LOG_DEBUG, "input_fd : %d", input_fd);
+    syslog(LOG_DEBUG, "output_fd : %d", output_fd);
 
     ret = (int)write(code_fd, run->code, strlen(run->code));
     if (ret < 0) {
@@ -101,8 +103,9 @@ int judge(run_param * run)
         syslog(LOG_DEBUG, "code compile status code:%d\n",cs);
     }
 
-    null_dev = open("/dev/null", O_RDWR);
-    
+    null_fd = open("/dev/null", O_RDWR);
+    syslog(LOG_DEBUG, "null_fd : %d", null_fd);
+
     nobody = getpwnam("nobody");
     if (nobody == NULL) {
         syslog(LOG_ERR, "find user nobody failed.\n");
@@ -129,7 +132,7 @@ int judge(run_param * run)
         }*/
         //chdir("/");
         
-        dup2(null_dev, STDERR_FILENO);
+        dup2(null_fd, STDERR_FILENO);
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
         
@@ -173,6 +176,7 @@ int judge(run_param * run)
             }
             if (cs == PS_SYSCALL) {
                 ret = syscall_checker(pid);
+                syscall_debug(pid);
                 if (ret == SS_FORBIDDEN) {
                     syslog(LOG_INFO, "forbid syscall");
                     ptrace(PTRACE_KILL, pid, NULL, NULL);

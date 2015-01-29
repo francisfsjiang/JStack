@@ -16,6 +16,9 @@
 #include <sys/wait.h>
 #include <sys/user.h>
 
+#include "checker.h"
+#include "util.h"
+
 #define INPUT_DIR "/home/data"
 
 typedef struct
