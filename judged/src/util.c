@@ -54,7 +54,12 @@ void syscall_debug(int pid)
         case SYS_write:
             syslog(LOG_DEBUG, "%d SYS_write:", SYS_write);
             syslog(LOG_DEBUG, "fd: %lld", regs.rdi);
-            syscall_debug_str("content", pid, regs.rsi, regs.rdx);
+            syscall_debug_str("content:", pid, regs.rsi, regs.rdx);
+            break;
+        case SYS_read:
+            syslog(LOG_DEBUG, "%d SYS_read:", SYS_read);
+            syslog(LOG_DEBUG, "fd: %lld", regs.rdi);
+            syscall_debug_str("content:", pid, regs.rsi, regs.rdx);
             break;
         case SYS_open:
             syslog(LOG_DEBUG, "%d SYS_open:", SYS_open);
