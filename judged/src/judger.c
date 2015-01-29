@@ -129,16 +129,16 @@ int judge(run_param * run)
         if (ret < 0) {
             syslog(LOG_ERR, "chroot failed. %s", strerror(errno));
             exit(EXIT_FAILURE);
-        }*/
-        //chdir("/");
+        }
+        chdir("/");*/
         
         dup2(null_fd, STDERR_FILENO);
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
         
-        //setuid(nobody_uid);
-        //setgid(nobody_gid);
-
+        setuid(nobody_uid);
+        setgid(nobody_gid);
+        syslog(LOG_DEBUG, "start ptrace");
         ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
@@ -151,7 +151,7 @@ int judge(run_param * run)
     else if (pid > 0){
         //parent
         struct rusage usage;
-        
+        syslog(LOG_DEBUG, "start watching");
         while(1) { //listening
             wait4(pid, &status, WUNTRACED | WCONTINUED, &usage);
             int cs = parse_status(status);
