@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/user.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
@@ -14,6 +16,8 @@
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 #include <sys/syscall.h>
+
+#include "util.h"
 
 enum SYSCALL_STATUS{
     SS_ALLOW,

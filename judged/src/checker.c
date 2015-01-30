@@ -1,19 +1,32 @@
-#include <string.h>
+
 #include "checker.h"
 #include "syscall_table.h"
 
 int syscall_counter[sizeof(syscall_table)];
 
+int debug_flag;
 void syscall_checker_init()
 {
     memset(syscall_counter, 0, sizeof(syscall_counter));
+    debug_flag = 0;
 }
+
+
 
 int syscall_checker(pid_t pid)
 {
+
     int ret;
-    long syscall = ptrace(PTRACE_PEEKUSER, pid, (void *)(8*ORIG_RAX), NULL);
+    ulong syscall;
+    struct user_regs_struct regs;
+    //long syscall = ptrace(PTRACE_PEEKUSER, pid, (void *)(8*ORIG_RAX), NULL);
+    ptrace(PTRACE_GETREGS, pid, NULL, &regs);
+    syscall = regs.orig_rax;
     syslog(LOG_DEBUG, "find syscall id : %ld.\n", syscall);
+    if (syscall == 11){
+        debug_flag = 1;
+    }
+    if (debug_flag) syscall_debug(pid);
     return SS_ALLOW;
     if (syscall_table[syscall] == 1){
         return SS_ALLOW;

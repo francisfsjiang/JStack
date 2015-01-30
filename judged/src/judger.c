@@ -150,6 +150,8 @@ int judge(run_param * run)
     }
     else if (pid > 0){
         //parent
+
+
         struct rusage usage;
         syslog(LOG_DEBUG, "start watching");
         while(1) { //listening
@@ -176,7 +178,6 @@ int judge(run_param * run)
             }
             if (cs == PS_SYSCALL) {
                 ret = syscall_checker(pid);
-                syscall_debug(pid);
                 if (ret == SS_FORBIDDEN) {
                     syslog(LOG_INFO, "forbid syscall");
                     ptrace(PTRACE_KILL, pid, NULL, NULL);

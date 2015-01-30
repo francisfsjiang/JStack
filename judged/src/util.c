@@ -46,10 +46,6 @@ void syscall_debug(int pid)
     //long params[3];
     struct user_regs_struct regs;
     ptrace(PTRACE_GETREGS, pid, NULL, &regs);
-    //orig_eax = ptrace(PTRACE_PEEKUSER, pid, 8 * ORIG_RAX, NULL);
-    //params[0] = ptrace(PTRACE_PEEKUSER, pid, 8 * RDI, NULL);
-    //params[1] = ptrace(PTRACE_PEEKUSER, pid, 8 * RSI, NULL);
-    //params[2] = ptrace(PTRACE_PEEKUSER, pid, 8 * RDX, NULL);
     switch (regs.orig_rax){
         case SYS_write:
             syslog(LOG_DEBUG, "%d SYS_write:", SYS_write);
