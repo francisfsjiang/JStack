@@ -31,8 +31,18 @@ char *code_file_name[]={
 
 };
 
-char *compile_cmd[][10]={
-        {"gcc","main.c","-o","main", NULL},
+char *compile_cmd[][20]={
+        {"gcc",
+                "-static",
+                "-fno-optimize-sibling-calls",
+                "-fno-strict-aliasing",
+                "-DONLINE_JUDGE",
+                "-fno-asm",
+                "-lm",
+                "-s",
+                //"-Wl,--stack=268435456",
+                "-O2",
+                "-o", "main","main.c", NULL},
         {"g++","main.cpp","-o","main", NULL},
         NULL,
         NULL,
@@ -180,7 +190,7 @@ int judge(run_param * run)
             syslog(LOG_ERR, "Error initiating ptrace");
         }
         char *argv[] = {NULL};
-        ret = execv("code", argv);
+        ret = execv("main", argv);
         syslog(LOG_ERR, "run code error.\n");
         //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
     }
