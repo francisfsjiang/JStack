@@ -18,12 +18,13 @@ struct run_param{
 char cbuf[1000];
 char buffer[1000];
 
-int main()
+int main(int argc,const char* argv[])
 {
 	int sock_fd;
 	int fd;
 	struct sockaddr_in sock_addr;
 	int ret;
+	int lang_id=atoi(argv[1]);
 	struct run_param p;
 	sock_fd = socket(PF_INET, SOCK_STREAM,0);
 
@@ -36,12 +37,24 @@ int main()
 		printf("con failed.%s\n",strerror(errno));
 		exit(1);
 	}
-
-	p.id = 0;
+	
+	p.id = lang_id;
 	p.lang = 0;
 	p.tl = 1000;
 	p.ml = 1001;
-	fd = open("test.c",O_RDONLY);
+	const char* filename;
+	switch(lang_id){
+		case 0:
+			filename="test_code/c/main.c";
+			break;
+		case 1:
+			filename="test_code/cxx/main.cpp";
+			break;
+		default:
+			return -1;
+			break;
+	}
+	fd = open(filename,O_RDONLY);
 	printf("open fd %d.\n",fd);
 	ret = read(fd, cbuf, sizeof(cbuf));
 	p.cl=ret;

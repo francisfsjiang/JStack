@@ -1,23 +1,55 @@
 #include "judger.h"
 
-
 char * const TEMP_DIR_TEMPLATE = "/tmp/judgetmp.XXXXXX";
 char TEMP_DIR[] = "/tmp/judgetmp.XXXXXX";
 
+/*
+enum lang{
+    C=0,
+    CXX,
+    PASCAL,
+    JAVA,
+    CSHARP,
+    OBJC,
+    PYTHON2,
+    PYTHON3,
+    RUBY,
+    OCTAVE,
+};
+ */
+
 char *code_file_name[]={
-        "code.c",
-        "code.cpp",
-        "code.java",
+        "main.c",
+        "main.cpp",
+        "main.pas",
+        "Main.java",
+        NULL,
+        NULL,
+        "main.py",
+        "main.py",
+        "main.rb",
+
 };
 
 char *compile_cmd[][10]={
-    {"gcc","code.c","-o","code", NULL},
-    {"g++","code.cpp","-o","code", NULL},
+        {"gcc","main.c","-o","main", NULL},
+        {"g++","main.cpp","-o","main", NULL},
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
 };
 
 char *run_cmd[][10]={
-    {"./code", "./code", NULL},
-    {"./code", "./code", NULL},
+        {"./code", "./code", NULL},
+        {"./code", "./code", NULL},
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        {"python","python","main.py" , NULL},
 };
 
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
@@ -84,24 +116,28 @@ int judge(run_param * run)
     }
     close(code_fd);
 
-    //compile code
-    pid = fork();
-    if (pid < 0) {
-        syslog(LOG_ERR,"judge compile fork error");
-        return -1;
-    }
-    if (pid == 0) {
-        ret = execvp(compile_cmd[run->lang][0],compile_cmd[run->lang]);
-        if (ret < 0){
-            syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
-            exit(EXIT_FAILURE);
+    if (compile_cmd[run->lang]!= NULL) {
+        //compile code
+        pid = fork();
+        if (pid < 0) {
+            syslog(LOG_ERR,"judge compile fork error");
+            return -1;
         }
+        if (pid == 0) {
+            ret = execvp(compile_cmd[run->lang][0],compile_cmd[run->lang]);
+            if (ret < 0){
+                syslog(LOG_ERR, "exec err: %s.\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        }
+        else {
+            waitpid(pid, &status, WUNTRACED | WCONTINUED);
+            int cs = parse_status(status);
+            syslog(LOG_DEBUG, "code compile status code:%d\n",cs);
+        }
+
     }
-    else {
-        waitpid(pid, &status, WUNTRACED | WCONTINUED);
-        int cs = parse_status(status);
-        syslog(LOG_DEBUG, "code compile status code:%d\n",cs);
-    }
+
 
     null_fd = open("/dev/null", O_RDWR);
     syslog(LOG_DEBUG, "null_fd : %d", null_fd);

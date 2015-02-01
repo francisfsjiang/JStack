@@ -46,6 +46,7 @@ enum status_code{
 enum lang{
     C=0,
     CXX,
+    PASCAL,
     JAVA,
     CSHARP,
     OBJC,
