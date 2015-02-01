@@ -1,3 +1,7 @@
 import sys
-a = sys.stdin.readline().split()
-print(int(a[0])+int(a[1]))
+while 1:
+    line = sys.stdin.readline()
+    if not line:
+        break;
+    a= line.split()
+    print(int(a[0])+int(a[1]))

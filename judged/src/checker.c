@@ -23,10 +23,11 @@ int syscall_checker(pid_t pid)
     ptrace(PTRACE_GETREGS, pid, NULL, &regs);
     syscall = regs.orig_rax;
     syslog(LOG_DEBUG, "find syscall id : %ld.\n", syscall);
-    if (syscall == 11){
-        debug_flag = 1;
-    }
-    if (debug_flag) syscall_debug(pid);
+    //if (syscall == 11){
+    //    debug_flag = 1;
+    //}
+    //if (debug_flag)
+    //syscall_debug(pid);
     return SS_ALLOW;
     if (syscall_table[syscall] == 1){
         return SS_ALLOW;

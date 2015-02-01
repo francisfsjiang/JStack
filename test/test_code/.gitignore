@@ -1,1 +1,7 @@
 c/main
+cpp/main
+pascal/main.o
+pascal/main
+csharp/main.exe
+java/Main.class
+*.strace

@@ -6,6 +6,7 @@
 #include<sys/socket.h>
 #include<netinet/in.h>
 #include<arpa/inet.h>
+#include <unistd.h>
 
 struct run_param{
 	uint id;
@@ -38,8 +39,8 @@ int main(int argc,const char* argv[])
 		exit(1);
 	}
 	
-	p.id = lang_id;
-	p.lang = 0;
+	p.id = 0;
+	p.lang = lang_id;
 	p.tl = 1000;
 	p.ml = 1001;
 	const char* filename;
@@ -48,7 +49,25 @@ int main(int argc,const char* argv[])
 			filename="test_code/c/main.c";
 			break;
 		case 1:
-			filename="test_code/cxx/main.cpp";
+			filename="test_code/cpp/main.cpp";
+			break;
+		case 2:
+			filename="test_code/pascal/main.pp";
+			break;
+		case 3:
+			filename="test_code/java/Main.java";
+			break;
+		case 4:
+			filename="test_code/csharp/main.cs";
+			break;
+		case 6:
+			filename="test_code/python2/main.py";
+			break;
+		case 7:
+			filename="test_code/python3/main.py";
+			break;
+		case 8:
+			filename="test_code/ruby/main.rb";
 			break;
 		default:
 			return -1;

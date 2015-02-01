@@ -21,10 +21,10 @@ enum lang{
 char *code_file_name[]={
         "main.c",
         "main.cpp",
-        "main.pas",
+        "main.pp",
         "Main.java",
-        NULL,
-        NULL,
+        "main.cs",
+        "main.objc",
         "main.py",
         "main.py",
         "main.rb",
@@ -43,23 +43,36 @@ char *compile_cmd[][20]={
                 //"-Wl,--stack=268435456",
                 "-O2",
                 "-o", "main","main.c", NULL},
-        {"g++","main.cpp","-o","main", NULL},
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+        {"g++",
+                "-static",
+                "-DONLINE_JUDGE",
+                "-lm",
+                "-s",
+                "-x",
+                "c++",
+                "-O2",
+                "-std=c++11",
+                "-o", "main","main.cpp", NULL},
+        {"fpc",
+                "main.pp", NULL},
+        {"javac",
+                "Main.java", NULL},
+        {"mcs",
+                "main.cs", NULL},
+        {NULL},
+        {NULL},
+        {NULL},
 };
 
 char *run_cmd[][10]={
-        {"./code", "./code", NULL},
-        {"./code", "./code", NULL},
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        {"python","python","main.py" , NULL},
+        {"./main", NULL},
+        {"./main", NULL},
+        {"./main", NULL},
+        {"java", "Main", NULL},
+        {"mono", "main.exe", NULL},
+        {NULL},
+        {"python","main.py" ,NULL},
+        {"python3","main.py" ,NULL},
 };
 
 void get_file_fd(uint probelm_id, int * fd, const char * file_path, const char * target_name, int mode)
@@ -125,8 +138,8 @@ int judge(run_param * run)
         return -1;
     }
     close(code_fd);
-
-    if (compile_cmd[run->lang]!= NULL) {
+    syslog(LOG_DEBUG, "compile_cmd %ld", compile_cmd[run->lang][0]);
+    if (compile_cmd[run->lang][0]!= NULL) {
         //compile code
         pid = fork();
         if (pid < 0) {
@@ -160,9 +173,12 @@ int judge(run_param * run)
     nobody_uid = nobody->pw_uid;
     nobody_gid = nobody->pw_gid;
 
-    //char *argv[] = {NULL};
+    //char *argv[] = {"python", "main.py", NULL};
     //ret = execv("code", argv);
     //syslog(LOG_ERR, "run code error.\n");
+    //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
+    //ret = execvp("python", argv);
+    //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
 
     pid = fork();
     if (pid < 0) {
@@ -181,16 +197,17 @@ int judge(run_param * run)
         dup2(null_fd, STDERR_FILENO);
         dup2(input_fd, STDIN_FILENO);
         dup2(output_fd, STDOUT_FILENO);
-        
+        syslog(LOG_DEBUG, "start ptrace");
         setuid(nobody_uid);
         setgid(nobody_gid);
-        syslog(LOG_DEBUG, "start ptrace");
+
         ret = (int) ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         if (ret < 0){
             syslog(LOG_ERR, "Error initiating ptrace");
         }
-        char *argv[] = {NULL};
-        ret = execv("main", argv);
+        //char *argv[] = {NULL};
+        //ret = execvp("./main", argv);
+        execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
         syslog(LOG_ERR, "run code error.\n");
         //ret = execvp(run_cmd[run->lang][0], run_cmd[run->lang]);
     }
